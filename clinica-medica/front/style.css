@@ -1,0 +1,183 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background-color: #f4f6f9;
+  color: #222;
+}
+
+header {
+  background-color: #164416;
+  color: #fff;
+  padding: 1.2rem;
+  text-align: center;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 1.8rem;
+}
+
+main {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+section {
+  background: #fff;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+/* Oculta qualquer elemento com essa classe */
+.oculto { display: none; }
+
+h2 {
+  margin-top: 0;
+  color: #164416;
+  border-bottom: 2px solid #ecf0f1;
+  padding-bottom: 0.5rem;
+}
+
+/* Formulário */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+label {
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+input, select {
+  padding: 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-family: inherit;
+  background-color: #fff;
+}
+
+input:focus, select:focus {
+  outline: none;
+  border-color: #45c42c;
+}
+
+input.invalido {
+  border-color: #e74c3c;
+  background-color: #fdecea;
+}
+
+.erro {
+  color: #e74c3c;
+  font-size: 0.8rem;
+  margin-top: -0.3rem;
+}
+
+.botoes-form {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 0.5rem;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  font-weight: bold;
+  transition: opacity 0.2s ease;
+}
+
+button:hover {
+  opacity: 0.85;
+}
+
+#btn-salvar {
+  background-color: #39c42c;
+  color: #fff;
+}
+
+#btn-cancelar {
+  background-color: #95a5a6;
+  color: #fff;
+}
+
+/* Tabela */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+thead {
+  background-color: #164416;
+  color: #fff;
+}
+
+th, td {
+  padding: 0.7rem;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+tbody tr:hover {
+  background-color: #f1f5f9;
+}
+
+.btn-editar, .btn-remover {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+  margin-right: 0.4rem;
+}
+
+.btn-editar {
+  background-color: #f39c12;
+  color: #fff;
+}
+
+.btn-remover {
+  background-color: #e74c3c;
+  color: #fff;
+}
+
+footer {
+  text-align: center;
+  padding: 1rem;
+  color: #777;
+  font-size: 0.85rem;
+}
+
+/* Classe para destacar o botão selecionado (mesma cor do header) */
+.menu-secao button.ativo {
+  background-color: #164416;
+  color: #fff;
+  border: 1px solid #164416;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Estilo padrão para os botões do menu quando NÃO estão ativos */
+.menu-secao button {
+  background-color: #fff;
+  color: #164416;
+  border: 1px solid #164416;
+  font-weight: bold;
+  transition: all 0.2s ease;
+}
+
+
+
+
+
+
+
