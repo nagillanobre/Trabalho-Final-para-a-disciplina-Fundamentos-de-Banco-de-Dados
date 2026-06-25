@@ -1,5 +1,5 @@
 //  LOGICA DE NAVEGAÇÃO DOS MENUS (COM DESTAQUE) 
-// teste de comit
+// teste de comit 002
 
 document.addEventListener('DOMContentLoaded', () => {
     // Seletores dos elementos principais
