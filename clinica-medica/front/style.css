@@ -39,6 +39,13 @@ section {
 
 /* Oculta qualquer elemento com essa classe */
 .oculto { display: none; }
+.escondido { display: none; }
+
+/* Campo de busca nas seções de listagem */
+section > input[type="text"] {
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
 
 h2 {
   margin-top: 0;
@@ -174,10 +181,3 @@ footer {
   font-weight: bold;
   transition: all 0.2s ease;
 }
-
-
-
-
-
-
-
