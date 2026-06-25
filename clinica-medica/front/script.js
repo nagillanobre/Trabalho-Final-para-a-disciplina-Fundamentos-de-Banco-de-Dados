@@ -1,4 +1,5 @@
 //  LOGICA DE NAVEGAÇÃO DOS MENUS (COM DESTAQUE) 
+// teste de comit
 
 document.addEventListener('DOMContentLoaded', () => {
     // Seletores dos elementos principais
