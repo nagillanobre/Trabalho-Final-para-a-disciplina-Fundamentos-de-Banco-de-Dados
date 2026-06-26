@@ -1,0 +1,15 @@
+{
+  "name": "clinica-medica",
+  "version": "1.0.0",
+  "description": "Sistema web CRUD para clínica médica - Desenvolvimento de Software para Web",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "sqlite3": "^5.1.7",
+    "cors": "^2.8.5"
+  }
+}

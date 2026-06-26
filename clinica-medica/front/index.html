@@ -96,8 +96,10 @@
     <h2>Cadastro de Atendimentos</h2>
     <form id="form-atendimento">
 
-      <label for="idPacienteAtend">ID do Paciente:</label>
-      <input type="number" id="idPacienteAtend" placeholder="Digite o ID do paciente" required>
+      <label for="cpfPacienteAtend">CPF do Paciente:</label>
+      <input type="text" id="cpfPacienteAtend" placeholder="Ex: 123.456.789-01" inputmode="numeric" maxlength="14" required>
+      <small id="erro-cpf-atend" class="erro oculto">Nenhum paciente encontrado com esse CPF.</small>
+      <small id="info-paciente-atend" class="info oculto"></small>
 
       <label for="dataHoraAtendimento">Data e hora do atendimento:</label>
       <input type="datetime-local" id="dataHoraAtendimento" required>
@@ -130,22 +132,8 @@
       </select>
 
       <!-- Campos visíveis apenas para EXAME -->
-      <label for="tipo-exame" class="oculto exame-elemento">Tipo de Exame:</label>
-      <select id="tipo-exame" class="oculto exame-elemento">
-        <option value="">-- Selecione --</option>
-        <option value="Check-up">Check-up</option>
-        <option value="Hemograma">Hemograma</option>
-        <option value="Imagem">Exame de Imagem</option>
-        <option value="Ressonância Magnética">Ressonância Magnética</option>
-        <option value="Eletrocardiograma">Eletrocardiograma</option>
-        <option value="Ultrassonografia">Ultrassonografia</option>
-        <option value="Tomografia">Tomografia Computadorizada</option>
-      </select>
-
-      <label for="exame-especif" class="oculto exame-elemento">Exame Disponível:</label>
-      <select id="exame-especif" class="oculto exame-elemento">
-        <option value="">-- Selecione o tipo primeiro --</option>
-      </select>
+      <label for="exame-especif" class="oculto exame-elemento">Especificação do Exame:</label>
+      <input type="text" id="exame-especif" class="oculto exame-elemento" placeholder="Ex: Hemograma completo com plaquetas">
 
       <div class="botoes-form">
         <button type="submit" id="btn-salvar-atend">Cadastrar</button>
@@ -156,8 +144,7 @@
   <!-- ===== BUSCA: PACIENTE ===== -->
   <section id="busca-paciente" class="oculto">
     <h2>Pacientes Cadastrados</h2>
-    <input type="text" id="busca-paciente-input" placeholder="Buscar por nome ou CPF...">
-    <br><br>
+    <input type="text" id="busca-paciente-input" placeholder="Buscar por nome ou CPF...">    <br><br>
     <table id="tabelaPaciente">
       <thead>
         <tr>
@@ -176,7 +163,7 @@
   <!-- ===== BUSCA: MÉDICO ===== -->
   <section id="busca-medico" class="oculto">
     <h2>Médicos Cadastrados</h2>
-    <input type="text" id="busca-medico-input" placeholder="Buscar por nome ou especialidade...">
+    <input type="text" id="busca-medico-input" placeholder="Buscar por nome ou ID...">
     <br><br>
     <table id="tabelaMedico">
       <thead>
@@ -201,13 +188,13 @@
       <thead>
         <tr>
           <th>ID Atend.</th>
-          <th>ID Paciente</th>
           <th>Paciente</th>
+          <th>CPF</th>
           <th>Telefone</th>
           <th>Data</th>
           <th>Hora</th>
           <th>Médico</th>
-          <th>Tipo</th>
+          <th>Tipo / Especificação</th>
           <th>Ações</th>
         </tr>
       </thead>

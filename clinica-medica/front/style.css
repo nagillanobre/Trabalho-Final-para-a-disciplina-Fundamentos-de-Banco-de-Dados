@@ -85,11 +85,8 @@ input.invalido {
   background-color: #fdecea;
 }
 
-.erro {
-  color: #e74c3c;
-  font-size: 0.8rem;
-  margin-top: -0.3rem;
-}
+.erro  { color: #e74c3c; font-size: 0.8rem; margin-top: -0.3rem; }
+.info  { color: #27ae60; font-size: 0.8rem; margin-top: -0.3rem; }
 
 .botoes-form {
   display: flex;

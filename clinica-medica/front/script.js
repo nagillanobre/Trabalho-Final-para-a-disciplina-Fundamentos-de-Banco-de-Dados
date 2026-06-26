@@ -1,3 +1,9 @@
+// Trabalho de banco de dados - EQUIPE 2 - Clinica medica
+// Caua Moreira Guimaraes - 540850
+// COLOQUEM O NOME DE VCS TAMBEM
+
+
+
 // Logica para navegacao nos menus
 // MENUS
 document.addEventListener('DOMContentLoaded', () => {
@@ -59,8 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-// HELPERS GERAIS
-
+// Helpers
 
 function escapar(texto) {
   return String(texto || '').replace(/'/g, "\\'");
@@ -92,7 +97,7 @@ async function chamarAPI(url, opcoes = {}) {
 }
 
 
-// PACIENTE — CRUD
+// Paciente - CRUD
 
 const formPaciente        = document.getElementById('form-paciente');
 const campoPacienteId     = document.getElementById('paciente-id');
@@ -243,8 +248,7 @@ function resetarFormPaciente() {
 btnCancelarPaciente.addEventListener('click', resetarFormPaciente);
 
 
-// MÉDICO — CRUD
-
+// Medico - CRUD
 
 const formMedico         = document.getElementById('form-medico');
 const campoMedicoId      = document.getElementById('medico-id');
@@ -292,11 +296,11 @@ document.getElementById('busca-medico-input').addEventListener('input', function
 
 formMedico.addEventListener('submit', async (e) => {
   e.preventDefault();
+  const editando = campoMedicoId.value;
   const dados = {
     nome:          campoNomeMedico.value.trim(),
-    especialidade: campoEspecialidade.value.trim()
+    especialidade: campoEspecialidade.value
   };
-  const editando = campoMedicoId.value;
   try {
     if (editando) {
       await chamarAPI(`/api/medicos/${editando}`, { method: 'PUT', body: JSON.stringify(dados) });
@@ -346,8 +350,7 @@ function resetarFormMedico() {
 btnCancelarMedico.addEventListener('click', resetarFormMedico);
 
 
-// ATENDIMENTO — selects dinâmicos + CREATE + READ + DELETE
-
+// Atendimento - CRUD
 
 const ocultarGrupo = (cls) => document.querySelectorAll(cls).forEach(el => el.classList.add('oculto'));
 const mostrarGrupo = (cls) => document.querySelectorAll(cls).forEach(el => el.classList.remove('oculto'));
@@ -355,26 +358,59 @@ const mostrarGrupo = (cls) => document.querySelectorAll(cls).forEach(el => el.cl
 const selectTipoAtend    = document.getElementById('tipo-atendimento');
 const selectEspecialid   = document.getElementById('tipo-profissional');
 const selectProfissional = document.getElementById('profissional');
-const selectTipoExame    = document.getElementById('tipo-exame');
-const selectExameEspecif = document.getElementById('exame-especif');
+const inputExameEspecif  = document.getElementById('exame-especif');
 
-// Consulta ou Exame
+const campoCPFAtend   = document.getElementById('cpfPacienteAtend');
+const erroCPFAtend    = document.getElementById('erro-cpf-atend');
+const infoPacienteAtend = document.getElementById('info-paciente-atend');
+
+// Máscara de CPF no campo de atendimento
+campoCPFAtend.addEventListener('input', () => {
+  let v = campoCPFAtend.value.replace(/\D/g, '').slice(0, 11);
+  v = v.replace(/(\d{3})(\d)/, '$1.$2');
+  v = v.replace(/(\d{3})(\d)/, '$1.$2');
+  v = v.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+  campoCPFAtend.value = v;
+
+  // Limpa feedbacks ao editar
+  erroCPFAtend.classList.add('oculto');
+  infoPacienteAtend.classList.add('oculto');
+  campoCPFAtend.classList.remove('invalido');
+});
+
+// Verificação do CPF ao sair do campo (blur) — mostra nome do paciente se encontrado
+campoCPFAtend.addEventListener('blur', async () => {
+  const cpf = limparCPF(campoCPFAtend.value);
+  if (cpf.length !== 11) return;
+  try {
+    const paciente = await chamarAPI(`/api/pacientes/cpf/${cpf}`);
+    infoPacienteAtend.textContent = `✓ Paciente encontrado: ${paciente.nome}`;
+    infoPacienteAtend.classList.remove('oculto');
+    erroCPFAtend.classList.add('oculto');
+    campoCPFAtend.classList.remove('invalido');
+  } catch (_) {
+    erroCPFAtend.classList.remove('oculto');
+    infoPacienteAtend.classList.add('oculto');
+    campoCPFAtend.classList.add('invalido');
+  }
+});
+
+// Etapa 1 de verificacao: Consulta ou Exame
 selectTipoAtend.addEventListener('change', function () {
   ocultarGrupo('.consulta-elemento');
   ocultarGrupo('.exame-elemento');
   selectEspecialid.value = '';
   selectProfissional.innerHTML = '<option value="">-- Selecione a especialidade primeiro --</option>';
-  selectExameEspecif.innerHTML = '<option value="">-- Selecione o tipo primeiro --</option>';
 
   if (this.value === 'consulta') {
     mostrarGrupo('.consulta-elemento');
   } else if (this.value === 'exame') {
     mostrarGrupo('.exame-elemento');
-    mostrarGrupo('.consulta-elemento'); // exame também precisa de profissional responsável
+    mostrarGrupo('.consulta-elemento');
   }
 });
 
-// busca médicos pela especialidade selecionada no select
+// Etapa 2 de verificacao: busca médicos pela especialidade selecionada
 selectEspecialid.addEventListener('change', async function () {
   const esp = this.value;
   if (!esp) {
@@ -382,7 +418,6 @@ selectEspecialid.addEventListener('change', async function () {
     return;
   }
   selectProfissional.innerHTML = '<option value="">Buscando...</option>';
-
   try {
     const medicos = await chamarAPI(`/api/medicos/por-especialidade/${encodeURIComponent(esp)}`);
     if (medicos.length === 0) {
@@ -392,30 +427,9 @@ selectEspecialid.addEventListener('change', async function () {
       medicos.forEach(m => {
         selectProfissional.innerHTML += `<option value="${m.id_medico}">${m.nome}</option>`;
       });
-      mostrarGrupo('[for="profissional"], #profissional');
     }
   } catch (_) {
     selectProfissional.innerHTML = '<option value="">Erro ao buscar médicos</option>';
-  }
-});
-
-// Nível 2B: busca exames por categoria selecionada
-selectTipoExame.addEventListener('change', async function () {
-  const categoria = this.value;
-  if (!categoria) return;
-  selectExameEspecif.innerHTML = '<option value="">Buscando exames...</option>';
-  try {
-    const exames = await chamarAPI(`/api/exames/por-categoria/${encodeURIComponent(categoria)}`);
-    if (exames.length === 0) {
-      selectExameEspecif.innerHTML = '<option value="">Nenhum exame nessa categoria</option>';
-    } else {
-      selectExameEspecif.innerHTML = '<option value="">-- Selecione o Exame --</option>';
-      exames.forEach(ex => {
-        selectExameEspecif.innerHTML += `<option value="${ex.id_exame}">${ex.nome_exame}</option>`;
-      });
-    }
-  } catch (_) {
-    selectExameEspecif.innerHTML = '<option value="">Erro ao buscar exames</option>';
   }
 });
 
@@ -423,59 +437,49 @@ selectTipoExame.addEventListener('change', async function () {
 document.getElementById('form-atendimento').addEventListener('submit', async (e) => {
   e.preventDefault();
 
-  const idPaciente = document.getElementById('idPacienteAtend').value.trim();
-  const dataHora   = document.getElementById('dataHoraAtendimento').value;
-  const tipo       = selectTipoAtend.value;
+  const cpf      = limparCPF(campoCPFAtend.value);
+  const dataHora = document.getElementById('dataHoraAtendimento').value;
+  const tipo     = selectTipoAtend.value;
+  const idMedico = selectProfissional.value;
+  const especialidade_medico = selectEspecialid.value;
 
-  if (!idPaciente || !dataHora || !tipo) {
-    alert('Preencha todos os campos obrigatórios.');
+  if (!cpf || !dataHora || !tipo) {
+    alert('Preencha CPF, data/hora e tipo de atendimento.');
     return;
   }
+  if (cpf.length !== 11) {
+    campoCPFAtend.classList.add('invalido');
+    erroCPFAtend.classList.remove('oculto');
+    return;
+  }
+  if (!idMedico) { alert('Selecione o profissional responsável.'); return; }
 
   const [data, hora] = dataHora.split('T');
+  const payload = { cpf, data_consulta: data, hora, tipo, id_medico: idMedico, especialidade_medico };
 
-  if (tipo === 'consulta') {
-    const idMedico = selectProfissional.value;
-    if (!idMedico) { alert('Selecione o profissional.'); return; }
+  if (tipo === 'exame') {
+    const especificacao = inputExameEspecif.value.trim();
+    if (!especificacao) { alert('Informe a especificação do exame.'); return; }
+    payload.especificacao = especificacao;
+  }
 
-    try {
-      await chamarAPI('/api/consultas', {
-        method: 'POST',
-        body: JSON.stringify({ id_paciente: idPaciente, id_medico: idMedico, data_consulta: data, hora })
-      });
-      alert('Consulta cadastrada com sucesso!');
-      document.getElementById('form-atendimento').reset();
-      ocultarGrupo('.consulta-elemento');
-      ocultarGrupo('.exame-elemento');
-    } catch (e) {
-      alert(e.message);
-    }
-
-  } else if (tipo === 'exame') {
-    const idExame  = selectExameEspecif.value;
-    const idMedico = selectProfissional.value;
-    if (!idExame) { alert('Selecione o exame.'); return; }
-    if (!idMedico) { alert('Selecione o profissional responsável pelo exame.'); return; }
-
-    try {
-      await chamarAPI('/api/consultas', {
-        method: 'POST',
-        body: JSON.stringify({ id_paciente: idPaciente, id_medico: idMedico, data_consulta: data, hora, id_exame: idExame })
-      });
-      alert('Atendimento com exame cadastrado com sucesso!');
-      document.getElementById('form-atendimento').reset();
-      ocultarGrupo('.consulta-elemento');
-      ocultarGrupo('.exame-elemento');
-    } catch (e) {
-      alert(e.message);
-    }
+  try {
+    await chamarAPI('/api/atendimentos', { method: 'POST', body: JSON.stringify(payload) });
+    alert(tipo === 'consulta' ? 'Consulta cadastrada com sucesso!' : 'Exame cadastrado com sucesso!');
+    document.getElementById('form-atendimento').reset();
+    ocultarGrupo('.consulta-elemento');
+    ocultarGrupo('.exame-elemento');
+    erroCPFAtend.classList.add('oculto');
+    infoPacienteAtend.classList.add('oculto');
+  } catch (e) {
+    alert(e.message);
   }
 });
 
 // Lista atendimentos
 async function carregarAtendimentos(q) {
   try {
-    const url = q ? `/api/consultas?q=${encodeURIComponent(q)}` : '/api/consultas';
+    const url = q ? `/api/atendimentos?q=${encodeURIComponent(q)}` : '/api/atendimentos';
     const atendimentos = await chamarAPI(url);
     const corpo        = document.getElementById('corpo-tabela-atend');
     const msgVazio     = document.getElementById('msg-vazio-atend');
@@ -488,21 +492,19 @@ async function carregarAtendimentos(q) {
     msgVazio.classList.add('oculto');
 
     atendimentos.forEach(a => {
-      const tipo = a.nome_exame
-        ? `Exame: ${a.nome_exame} (${a.categoria_exame})`
-        : `Consulta — ${a.especialidade}`;
+      const especif = a.tipo === 'Exame' && a.especificacao ? ` — ${a.especificacao}` : '';
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td>${a.id_consulta}</td>
-        <td>${a.id_paciente}</td>
+        <td>${a.id_atendimento}</td>
         <td>${a.nome_paciente}</td>
+        <td>${formatarCPF(a.cpf)}</td>
         <td>${a.telefone}</td>
         <td>${formatarData(a.data_consulta)}</td>
         <td>${a.hora}</td>
         <td>${a.nome_medico}</td>
-        <td>${tipo}</td>
+        <td>${(a.tipo || '-') + especif}</td>
         <td>
-          <button class="btn-remover" onclick="removerAtendimento(${a.id_consulta})">Remover</button>
+          <button class="btn-remover" onclick="removerAtendimento(${a.id_atendimento})">Remover</button>
         </td>
       `;
       corpo.appendChild(tr);
@@ -519,7 +521,7 @@ document.getElementById('busca-atend-input').addEventListener('input', function 
 async function removerAtendimento(id) {
   if (!confirm('Tem certeza que deseja remover este atendimento?')) return;
   try {
-    await chamarAPI(`/api/consultas/${id}`, { method: 'DELETE' });
+    await chamarAPI(`/api/atendimentos/${id}`, { method: 'DELETE' });
     carregarAtendimentos();
   } catch (e) {
     alert(e.message);
