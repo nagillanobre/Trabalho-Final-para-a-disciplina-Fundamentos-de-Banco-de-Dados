@@ -289,6 +289,101 @@ app.delete('/api/atendimentos/:id', (req, res) => {
   });
 });
 
+
+// RELATÓRIOS GERENCIAIS
+
+app.get('/api/relatorios', (req, res) => {
+  // 1. Relatório de Consultas por médico (Seleção, Junção e Agregação)
+  const query1 = `
+    SELECT m.nome AS medico, m.especialidade, COUNT(c.id_consulta) AS total_consultas
+    FROM consulta c 
+    JOIN medico m ON c.id_medico = m.id_medico
+    GROUP BY m.nome, m.especialidade 
+    ORDER BY total_consultas DESC
+  `;
+
+  // 2. Relatório de Exames por paciente (Múltiplos Joins)
+  const query2 = `
+    SELECT p.nome AS paciente, e.especificacao, e.especialidade_medico
+    FROM exame e 
+    JOIN atendimento a ON e.id_atendimento = a.id_atendimento
+    JOIN paciente p ON a.id_paciente = p.id_paciente
+  `;
+
+  // 3. Relatório de Categorias de Exames mais realizadas (Seleção e Agregação)
+  const query3 = `
+    SELECT e.especificacao, COUNT(*) AS total_exames 
+    FROM exame e
+    GROUP BY e.especificacao 
+    ORDER BY total_exames DESC
+  `;
+
+  // Encapsulando as consultas do SQLite em Promises
+  const buscarConsultasPorMedico = () => {
+    return new Promise((resolve, reject) => {
+      db.all(query1, [], (err, rows) => {
+        if (err) reject(err);
+        else resolve(rows);
+      });
+    });
+  };
+
+  const buscarExamesPorPaciente = () => {
+    return new Promise((resolve, reject) => {
+      db.all(query2, [], (err, rows) => {
+        if (err) reject(err);
+        else resolve(rows);
+      });
+    });
+  };
+
+  const buscarExamesMaisRealizados = () => {
+    return new Promise((resolve, reject) => {
+      db.all(query3, [], (err, rows) => {
+        if (err) reject(err);
+        else resolve(rows);
+      });
+    });
+  };
+
+  // Executa as 3 consultas de forma simultânea
+  Promise.all([
+    buscarConsultasPorMedico(),
+    buscarExamesPorPaciente(),
+    buscarExamesMaisRealizados()
+  ])
+    .then(([dadosQ1, dadosQ2, dadosQ3]) => {
+      // Monta a estrutura JSON perfeitamente alinhada com o que o JavaScript do front-end espera
+      const respostaRelatorios = [
+        {
+          titulo: "Consultas por Médico (Seleção, Junção e Agregação)",
+          colunas: ["Médico", "Especialidade", "Total de Consultas"],
+          chaves: ["medico", "especialidade", "total_consultas"],
+          dados: dadosQ1
+        },
+        {
+          titulo: "Exames por Paciente (Junção de Tabelas)",
+          colunas: ["Paciente", "Especificação do Exame", "Especialidade Médica"],
+          chaves: ["paciente", "especificacao", "especialidade_medico"],
+          dados: dadosQ2
+        },
+        {
+          titulo: "Categoria de Exame Mais Realizada (Projeção e Contagem)",
+          colunas: ["Especificação do Exame", "Quantidade Total"],
+          chaves: ["especificacao", "total_exames"],
+          dados: dadosQ3
+        }
+      ];
+
+      res.json(respostaRelatorios);
+    })
+    .catch(erro => {
+      console.error("Erro ao processar relatórios:", erro.message);
+      res.status(500).json({ erro: "Erro interno ao processar as consultas do banco de dados." });
+    });
+});
+
 // START
 
 app.listen(PORT, () => console.log(`Servidor rodando em http://localhost:${PORT}`));
+

@@ -1,9 +1,8 @@
 // Trabalho de banco de dados - EQUIPE 2 - Clinica medica
 // Caua Moreira Guimaraes - 540850
 // Nagilla Nobre da Silva - 470934
-// COLOQUEM O NOME DE VCS TAMBEM
-
-
+// Antonio Sidney Vidal da Silva - 568579
+// 
 
 // Logica para navegacao nos menus
 // MENUS
@@ -540,5 +539,108 @@ async function removerAtendimento(id) {
     carregarAtendimentos();
   } catch (e) {
     alert(e.message);
+  }
+}
+
+
+// ===== RELATÓRIOS DINÂMICOS =====
+// Evento para carregar os relatórios quando o botão principal de relatórios for clicado
+document.getElementById('btn-relatorio').addEventListener('click', carregarRelatorios);
+
+async function carregarRelatorios() {
+  const conteiner = document.getElementById('conteiner-relatorios');
+  conteiner.innerHTML = '<p>Carregando relatórios...</p>';
+
+  try {
+    // Rota fictícia que trará todos os relatórios estruturados do back-end
+    const relatorios = await chamarAPI('/api/relatorios');
+    
+    conteiner.innerHTML = ''; // Limpa o "Carregando..."
+
+    // Se o back-end não retornar nenhum relatório configurado
+    if (!relatorios || relatorios.length === 0) {
+      conteiner.innerHTML = '<p>Nenhum tipo de relatório configurado no sistema.</p>';
+      return;
+    }
+
+    // Percorre cada relatório vindo do back-end
+    relatorios.forEach(relatorio => {
+      // Cria a estrutura de container para cada relatório individual
+      const divRelatorio = document.createElement('div');
+      divRelatorio.style.marginBottom = '2.5rem';
+
+      // Título do relatório (Ex: "Consultas por Especialidade (Join)")
+      const titulo = document.createElement('h3');
+      titulo.textContent = relatorio.titulo;
+      divRelatorio.appendChild(titulo);
+
+      // Cria a tabela
+      const tabela = document.createElement('table');
+      
+      // 1. CRIAÇÃO DINÂMICA DAS COLUNAS (THEAD)
+      const thead = document.createElement('thead');
+      const trHeader = document.createElement('tr');
+      
+      relatorio.colunas.forEach(nomeColuna => {
+        const th = document.createElement('th');
+        th.textContent = nomeColuna;
+        trHeader.appendChild(th);
+      });
+      thead.appendChild(trHeader);
+      tabela.appendChild(thead);
+
+      // 2. CRIAÇÃO DINÂMICA DAS LINHAS (TBODY)
+      const tbody = document.createElement('tbody');
+      
+      if (!relatorio.dados || relatorio.dados.length === 0) {
+        // Se não houver linhas, exibe a mensagem de feedback dentro da tabela ocupando todas as colunas
+        const trVazio = document.createElement('tr');
+        const tdVazio = document.createElement('td');
+        tdVazio.setAttribute('colspan', relatorio.colunas.length);
+        tdVazio.style.textAlign = 'center';
+        tdVazio.style.color = '#777';
+        tdVazio.style.padding = '1.5rem';
+        tdVazio.textContent = 'Nenhuma informação ainda.';
+        
+        trVazio.appendChild(tdVazio);
+        tbody.appendChild(trVazio);
+      } else {
+        // Se houver dados, preenche as linhas respeitando a ordem das colunas chaves do objeto
+        relatorio.dados.forEach(linha => {
+          const trLinha = document.createElement('tr');
+          
+          // O back-end deve mandar as chaves dos dados alinhadas com as colunas, ou em formato de array
+          // Supondo que o back-end mande a linha como um array de valores:
+          if (Array.isArray(linha)) {
+            linha.forEach(valor => {
+              const td = document.createElement('td');
+              td.textContent = valor === null || valor === undefined ? '-' : valor;
+              trLinha.appendChild(td);
+            });
+          } else {
+            // Se o back-end mandar como objeto, mapeamos pelas chaves declaradas em relatorio.chaves
+            relatorio.chaves.forEach(chave => {
+              const td = document.createElement('td');
+              let valor = linha[chave];
+              
+              // Aproveita suas funções de formatação existentes se necessário
+              if (chave === 'cpf') valor = formatarCPF(valor);
+              if (chave === 'data_consulta') valor = formatarData(valor);
+
+              td.textContent = valor === null || valor === undefined ? '-' : valor;
+              trLinha.appendChild(td);
+            });
+          }
+          tbody.appendChild(trLinha);
+        });
+      }
+
+      tabela.appendChild(tbody);
+      divRelatorio.appendChild(tabela);
+      conteiner.appendChild(divRelatorio);
+    });
+
+  } catch (e) {
+    conteiner.innerHTML = `<p class="erro">Erro ao carregar relatórios: ${e.message}</p>`;
   }
 }
