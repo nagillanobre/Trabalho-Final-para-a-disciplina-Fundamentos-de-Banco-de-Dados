@@ -1,5 +1,6 @@
 // Trabalho de banco de dados - EQUIPE 2 - Clinica medica
 // Caua Moreira Guimaraes - 540850
+// Nagilla Nobre da Silva - 470934
 // COLOQUEM O NOME DE VCS TAMBEM
 
 
@@ -9,8 +10,10 @@
 document.addEventListener('DOMContentLoaded', () => {
   const btnCadastro     = document.getElementById('btn-cadastro');
   const btnBusca        = document.getElementById('btn-busca');
+  const btnRelatorio    = document.getElementById('btn-relatorio');
   const submenuCadastro = document.getElementById('submenu-cadastro');
   const submenuBusca    = document.getElementById('submenu-busca');
+  const secaoRelatorio  = document.getElementById('tabelas-relatorio');
 
   const secoesConteudo = [
     'formulario-paciente', 'formulario-medico', 'formulario-atendimento',
@@ -32,6 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
     limparBotoesAtivos('.menu-secao:first-of-type button');
     btnCadastro.classList.add('ativo');
     submenuBusca.classList.add('oculto');
+    secaoRelatorio.classList.add('oculto');
     ocultarTodasSecoes();
     limparBotoesAtivos('#submenu-cadastro button');
     submenuCadastro.classList.remove('oculto');
@@ -41,10 +45,21 @@ document.addEventListener('DOMContentLoaded', () => {
     limparBotoesAtivos('.menu-secao:first-of-type button');
     btnBusca.classList.add('ativo');
     submenuCadastro.classList.add('oculto');
+    secaoRelatorio.classList.add('oculto');
     ocultarTodasSecoes();
     limparBotoesAtivos('#submenu-busca button');
     submenuBusca.classList.remove('oculto');
   });
+
+  btnRelatorio.addEventListener('click', () => {
+    limparBotoesAtivos('.menu-secao:first-of-type button');
+    btnRelatorio.classList.add('ativo');
+    submenuCadastro.classList.add('oculto');
+    submenuBusca.classList.add('oculto');
+    ocultarTodasSecoes();
+    secaoRelatorio.classList.remove('oculto');
+  });
+
 
   document.querySelectorAll('.menu-secao button[data-target]').forEach(botao => {
     botao.addEventListener('click', () => {
